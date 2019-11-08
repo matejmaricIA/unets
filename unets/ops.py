@@ -4,6 +4,23 @@ import torch.nn.functional as F
 
 from .utils import size_is_pow2
 
+
+class AttentionGate(nn.Module):
+    def __init__(self, n_features):
+        super(AttentionGate, self).__init__()
+        self.n_features = n_features
+
+        self.seq = nn.Sequential(
+            nn.Conv2d(self.n_features, self.n_features, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, inp):
+        g = self.seq(inp)
+
+        return g * inp
+
+
 class TrivialUpsample(nn.Module):
     def __init__(self, *args, **kwargs):
         super(TrivialUpsample, self).__init__()
