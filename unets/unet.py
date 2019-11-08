@@ -30,7 +30,7 @@ thin_setup = {
 }
 
 class Unet(nn.Module):
-    def __init__(self, in_features=1, out_features=1, up=None, down=None,
+    def __init__(self, in_features=1, up=None, down=None,
                  size=5, setup=fat_setup):
 
         super(Unet, self).__init__()
@@ -41,7 +41,6 @@ class Unet(nn.Module):
         self.up = up
         self.down = down
         self.in_features = in_features
-        self.out_features = out_features
 
         down_dims = [in_features] + down
         self.path_down = nn.ModuleList()
@@ -65,9 +64,6 @@ class Unet(nn.Module):
             )
             self.path_up.append(block)
 
-        self.logit_nonl = setup['gate'](up[-1])
-        self.logit_conv = nn.Conv2d(up[-1], self.out_features, 1)
-
         self.n_params = 0
         for param in self.parameters():
             self.n_params += param.numel()
@@ -90,5 +86,4 @@ class Unet(nn.Module):
         for layer, f_hor in zip(self.path_up, features_horizontal):
             f_bot = layer(f_bot, f_hor)
 
-        f_gated = self.logit_nonl(f_bot)
-        return self.logit_conv(f_gated)
+        return f_bot
