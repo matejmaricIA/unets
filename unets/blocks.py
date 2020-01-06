@@ -17,7 +17,12 @@ class Conv(nn.Sequential):
         else:
             padding = 0
 
-        conv = nn.Conv2d(in_, out_, size, padding=padding)
+        if 'bias' in setup:
+            bias = setup['bias']
+        else:
+            bias = True
+
+        conv = nn.Conv2d(in_, out_, size, padding=padding, bias=bias)
 
         super(Conv, self).__init__(norm, nonl, dropout, conv)
 

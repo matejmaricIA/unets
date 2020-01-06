@@ -15,7 +15,8 @@ fat_setup = {
     'down_block': UnetDownBlock,
     'up_block': UnetUpBlock,
     'dropout': NoOp,
-    'padding': False
+    'padding': False,
+    'bias': True
 }
 
 thin_setup = {
@@ -26,7 +27,8 @@ thin_setup = {
     'down_block': ThinUnetDownBlock,
     'up_block': ThinUnetUpBlock,
     'dropout': NoOp,
-    'padding': False
+    'padding': False,
+    'bias': True
 }
 
 class Unet(nn.Module):
