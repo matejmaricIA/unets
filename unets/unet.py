@@ -39,7 +39,10 @@ def checkpointed(cls):
     class Checkpointed(cls):
         def forward(self, *args, **kwargs):
             super_fwd = super(Checkpointed, self).forward
-            return checkpoint(super_fwd, *args, **kwargs)
+            if any((torch.is_tensor(arg) and arg.requires_grad) for arg in args):
+                return checkpoint(super_fwd, *args, **kwargs)
+            else:
+                return super_fwd(*args, **kwargs)
 
     return Checkpointed
 
