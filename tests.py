@@ -20,6 +20,17 @@ class BaseTests(unittest.TestCase):
         output = unet(input)
         self.assertEqual(torch.Size([2, 1, 24, 24]), output.size())
 
+class CheckpointedTests(unittest.TestCase):
+    def test_inequal_output_asymmetric(self):
+        unet = Unet(
+            in_features=3,
+            down=[16, 32, 64], up=[40, 4],
+            setup={**fat_setup, 'checkpointed': True}
+        )
+        input = torch.zeros(2, 3, 104, 104)
+        output = unet(input)
+        self.assertEqual(torch.Size([2, 4, 24, 24]), output.size())
+
 class NoBiasTests(unittest.TestCase):
     def test_bias(self):
         unet = Unet(

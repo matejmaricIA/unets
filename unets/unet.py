@@ -1,6 +1,7 @@
 import torch, itertools, functools
 import torch.nn as nn
 
+from torch.utils.checkpoint import checkpoint
 from torch_dimcheck import dimchecked
 
 from .utils import cut_to_match, size_is_pow2
@@ -31,6 +32,17 @@ thin_setup = {
     'bias': True
 }
 
+def checkpointed(cls):
+    assert issubclass(cls, torch.nn.Module)
+
+    #@functools.wraps(cls)
+    class Checkpointed(cls):
+        def forward(self, *args, **kwargs):
+            super_fwd = super(Checkpointed, self).forward
+            return checkpoint(super_fwd, *args, **kwargs)
+
+    return Checkpointed
+
 class Unet(nn.Module):
     def __init__(self, in_features=1, up=None, down=None,
                  size=5, setup=fat_setup):
@@ -44,6 +56,13 @@ class Unet(nn.Module):
         self.down = down
         self.in_features = in_features
 
+        DownBlock = setup['down_block']
+        UpBlock = setup['up_block']
+
+        if 'checkpointed' in setup and setup['checkpointed']:
+            UpBlock = checkpointed(UpBlock)
+            DownBlock = checkpointed(DownBlock)
+
         down_dims = [in_features] + down
         self.path_down = nn.ModuleList()
         for i, (d_in, d_out) in enumerate(zip(down_dims[:-1], down_dims[1:])):
@@ -52,7 +71,7 @@ class Unet(nn.Module):
             else:
                 setup_ = setup
 
-            block = setup['down_block'](
+            block = DownBlock(
                 d_in, d_out, size=size, name=f'down_{i}', setup=setup_
             )
             self.path_down.append(block)
@@ -61,7 +80,7 @@ class Unet(nn.Module):
         hor_dims = down_dims[-2::-1]
         self.path_up = nn.ModuleList()
         for i, (d_bot, d_hor, d_out) in enumerate(zip(bot_dims, hor_dims, up)):
-            block = setup['up_block'](
+            block = UpBlock(
                 d_bot, d_hor, d_out, size=size, name=f'up_{i}', setup=setup
             )
             self.path_up.append(block)
