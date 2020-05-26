@@ -69,13 +69,8 @@ class Unet(nn.Module):
         down_dims = [in_features] + down
         self.path_down = nn.ModuleList()
         for i, (d_in, d_out) in enumerate(zip(down_dims[:-1], down_dims[1:])):
-            if i == 0:
-                setup_ = {**setup, 'downsample': NoOp, 'norm': NoOp}
-            else:
-                setup_ = setup
-
             block = DownBlock(
-                d_in, d_out, size=size, name=f'down_{i}', setup=setup_
+                d_in, d_out, size=size, name=f'down_{i}', setup=setup, is_first=i==0,
             )
             self.path_down.append(block)
 

@@ -5,6 +5,7 @@ from torch_localize import localized
 from torch_dimcheck import dimchecked
 
 from .utils import cut_to_match, size_is_pow2
+from .ops import NoOp
 
 class Conv(nn.Sequential):
     def __init__(self, in_, out_, size, setup=None):
@@ -59,30 +60,38 @@ class Downsample(nn.Sequential):
 
 
 class UnetDownBlock(nn.Sequential):
-    def __init__(self, in_, out_, size=5, name=None,
+    def __init__(self, in_, out_, size=5, name=None, is_first=False,
                  setup=None):
 
         self.name = name
         self.in_ = in_
         self.out_ = out_
         
-        downsample = setup['downsample'](in_, size, setup=setup)
-        conv1 = Conv(in_, out_, size, setup=setup)
-        conv2 = Conv(out_, out_, size, setup=setup)
+        if is_first:
+            downsample = NoOp()
+            conv1 = Conv(in_, out_, size, setup={**setup, 'gate': NoOp, 'norm': NoOp})
+        else:
+            downsample = setup['downsample'](in_, size, setup=setup)
+            conv1 = Conv(in_, out_, size, setup=setup)
 
+        conv2 = Conv(out_, out_, size, setup=setup)
         super(UnetDownBlock, self).__init__(downsample, conv1, conv2)
 
 
 class ThinUnetDownBlock(nn.Sequential):
-    def __init__(self, in_, out_, size=5, name=None,
+    def __init__(self, in_, out_, size=5, name=None, is_first=False,
                  setup=None):
 
         self.name = name
         self.in_ = in_
         self.out_ = out_
         
-        downsample = setup['downsample'](in_, size, setup=setup)
-        conv = Conv(in_, out_, size, setup=setup)
+        if is_first:
+            downsample = NoOp()
+            conv = Conv(in_, out_, size, setup={**setup, 'gate': NoOp, 'norm': NoOp})
+        else:
+            downsample = setup['downsample'](in_, size, setup=setup)
+            conv = Conv(in_, out_, size, setup=setup)
 
         super(ThinUnetDownBlock, self).__init__(downsample, conv)
 
