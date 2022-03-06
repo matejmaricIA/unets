@@ -117,9 +117,9 @@ class UnetUpBlock(nn.Module):
 
     @localized
     @dimchecked
-    def forward(self, bot: ['b', 'fb', 'hb', 'wb'],
-                      hor: ['b', 'fh', 'hh', 'wh']
-               )        -> ['b', 'fo', 'ho', 'wo']:
+    def forward(self, bot: 'b fb hb wb',
+                      hor: 'b fh hh wh',
+               )        -> 'b fo ho wo':
 
 
         bot_big = self.upsample(bot)
@@ -147,9 +147,9 @@ class ThinUnetUpBlock(nn.Module):
 
     @localized
     @dimchecked
-    def forward(self, bot: ['b', 'fb', 'hb', 'wb'],
-                      hor: ['b', 'fh', 'hh', 'wh']
-               )        -> ['b', 'fo', 'ho', 'wo']:
+    def forward(self, bot: 'b fb hb wb',
+                      hor: 'b fh hh wh',
+               )        -> 'b fo ho wo':
 
 
         bot_big = self.upsample(bot)

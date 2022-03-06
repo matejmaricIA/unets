@@ -89,7 +89,7 @@ class Unet(nn.Module):
 
 
     @dimchecked
-    def forward(self, inp: ['b', 'fi', 'hi', 'wi']) -> ['b', 'fo', 'ho', 'wo']:
+    def forward(self, inp: 'b fi hi wi') -> 'b fo ho wo':
         if inp.size(1) != self.in_features:
             fmt = "Expected {} feature channels in input, got {}"
             msg = fmt.format(self.in_features, inp.size(1))
